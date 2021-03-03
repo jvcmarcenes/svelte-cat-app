@@ -4,7 +4,7 @@
 
 	let doggo = false
   $: tag = doggo ? 'Doggo' : 'Yako'
-  $: axios.defaults.headers.common['x-api-key'] = doggo ? catKey : dogKey
+  $: axios.defaults.headers.common['x-api-key'] = doggo ? dogKey : catKey
 
   let loading;
   let image;
@@ -12,16 +12,15 @@
 
   const requestParams = { limit: 1, size: 'full' }
 
-  let loadNextImage = async wantDoggo => {
+  let loadNextImage = async () => {
     try {
       loading = true
-      // request image from api
+      
       const res = await axios.get(
-        `https://api.the${wantDoggo ? 'dog' : 'cat'}api.com/v1/images/search`,
-        { requestParams }
+        `https://api.the${doggo ? 'dog' : 'cat'}api.com/v1/images/search`, { requestParams }
       )
       const data =  res.data[0]
-      // update image src and sizing
+
       imageStyle = data.width > data.height ? 'wide' : 'long'
       image = data.url
     } catch (err) {
@@ -31,7 +30,7 @@
     }
   }
 
-  $: loadNextImage(doggo)
+  $: loadNextImage() && doggo
 </script>
 
 <div id="app">
@@ -50,7 +49,7 @@
     </figure>
 
     <section class="controls">
-      <button class="btn" on:click={() => loadNextImage(!doggo)}>
+      <button class="btn" on:click={loadNextImage}>
         <span class="btn-label">Random {tag}</span>
         <!--icon refresh-->
       </button>
