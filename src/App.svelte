@@ -2,35 +2,21 @@
   import axios from 'axios'
   import { catKey, dogKey } from './keys'
 
+  const requestParams = { limit: 1, size: 'full' }
+
 	let doggo = false
   $: tag = doggo ? 'Doggo' : 'Yako'
   $: axios.defaults.headers.common['x-api-key'] = doggo ? dogKey : catKey
 
-  let loading;
-  let image;
-  let imageStyle;
+  let request;  
 
-  const requestParams = { limit: 1, size: 'full' }
-
-  let loadNextImage = async () => {
-    try {
-      loading = true
-      
-      const res = await axios.get(
-        `https://api.the${doggo ? 'dog' : 'cat'}api.com/v1/images/search`, { requestParams }
-      )
-      const data =  res.data[0]
-
-      imageStyle = data.width > data.height ? 'wide' : 'long'
-      image = data.url
-    } catch (err) {
-      console.log(err.toJSON())
-    } finally {
-      loading = false
-    }
+  function fetchImage() {
+    request = axios.get(
+      `https://api.the${doggo ? 'dog' : 'cat'}api.com/v1/images/search`, { requestParams }
+    ).then(res => res.data[0]).catch(err => console.log(err))
   }
 
-  $: loadNextImage() && doggo
+  $: fetchImage() && doggo
 </script>
 
 <div id="app">
@@ -43,13 +29,13 @@
 
   <main class="container">
     <figure class="image-container">
-      {#if loading} <div class="loader" />
-      {:else} <img src={image} alt="" id="image" class={imageStyle}>
-      {/if}
+      {#await request} <div class="loader" />
+      {:then img} <img src={img.url} alt="" id="image" class={img.width > img.height ? 'wide' : 'long'}>
+      {/await}
     </figure>
 
     <section class="controls">
-      <button class="btn" on:click={loadNextImage}>
+      <button class="btn" on:click={fetchImage}>
         <span class="btn-label">Random {tag}</span>
         <!--icon refresh-->
       </button>
