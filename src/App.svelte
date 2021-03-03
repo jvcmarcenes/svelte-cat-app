@@ -2,19 +2,19 @@
   import axios from 'axios'
   import { catKey, dogKey } from './keys'
 
-  const requestParams = { limit: 1, size: 'full' }
-
 	let doggo = false
   $: tag = doggo ? 'Doggo' : 'Yako'
   $: icon = doggo ? ' fa-dog' : ' fa-cat'
   $: axios.defaults.headers.common['x-api-key'] = doggo ? dogKey : catKey
-
-  let request;  
+  $: api_url = `https://api.the${doggo ? 'dog' : 'cat'}api.com/v1/images/search`
+  
+  const requestParams = { limit: 1, size: 'full' }
+  let req
 
   function fetchImage() {
-    request = axios.get(
-      `https://api.the${doggo ? 'dog' : 'cat'}api.com/v1/images/search`, { requestParams }
-    ).then(res => res.data[0]).catch(err => console.log(err))
+    req = axios.get(api_url, { requestParams })
+      .then(res => res.data[0])
+      .catch(err => console.log(err))
   }
 
   $: fetchImage() && doggo
@@ -31,22 +31,19 @@
 
   <main class="container">
     <figure class="image-container">
-      {#await request} <div class="loader" />
+      {#await req} <div class="loader" />
       {:then img} <img src={img.url} alt="" id="image" class={img.width > img.height ? 'wide' : 'long'}>
       {/await}
     </figure>
 
     <section class="controls">
-      <button class="btn" on:click={fetchImage}>
-        <span class="btn-label">Random {tag}</span>
-        <i class="fas fa-sync-alt"/>
-      </button>
+      <button class="btn" on:click={fetchImage}> Random {tag} <i class="fas fa-sync-alt"/> </button>
 
       <div class="doggo-toggle">
         <i class="icon fas fa-cat" class:active={!doggo} on:click={() => doggo = false}/>
         <label class="switch">
-          <input type="checkbox" bind:checked={doggo}>
-          <span class="slider"></span>
+          <input type="checkbox" bind:checked={doggo}/> 
+          <span class="slider"/>
         </label>
         <i class="icon fas fa-dog" class:active={doggo} on:click={() => doggo = true}/>
       </div>
@@ -184,8 +181,8 @@
       box-shadow: 0px 0px 6px 0px #555
     }
 
-    &-label {
-      margin-right: 10px;
+    >i {
+      margin-left: 10px;
     }
   }
 
