@@ -6,6 +6,7 @@
 
 	let doggo = false
   $: tag = doggo ? 'Doggo' : 'Yako'
+  $: icon = doggo ? ' fa-dog' : ' fa-cat'
   $: axios.defaults.headers.common['x-api-key'] = doggo ? dogKey : catKey
 
   let request;  
@@ -19,12 +20,13 @@
   $: fetchImage() && doggo
 </script>
 
+<svelte.head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css">
+</svelte.head>
+
 <div id="app">
   <header>
-    <h1>
-      {tag}
-      <!--icon yako/doggo-->
-    </h1>  
+    <h1> {tag} <i class={'fas' + icon}/> </h1>  
   </header>
 
   <main class="container">
@@ -37,16 +39,16 @@
     <section class="controls">
       <button class="btn" on:click={fetchImage}>
         <span class="btn-label">Random {tag}</span>
-        <!--icon refresh-->
+        <i class="fas fa-sync-alt"/>
       </button>
 
       <div class="doggo-toggle">
-        <!--icon yako-->
+        <i class="icon fas fa-cat" class:active={!doggo} on:click={() => doggo = false}/>
         <label class="switch">
           <input type="checkbox" bind:checked={doggo}>
           <span class="slider"></span>
         </label>
-        <!--icon doggo-->
+        <i class="icon fas fa-dog" class:active={doggo} on:click={() => doggo = true}/>
       </div>
 
       <footer class="credits">
